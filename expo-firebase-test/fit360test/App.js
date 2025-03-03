@@ -5,35 +5,39 @@ import { StatusBar } from 'expo-status-bar';
 import { LogBox } from 'react-native';
 
 import { AuthProvider } from './src/hooks/useAuth';
+import { OnboardingProvider } from './src/hooks/useOnboarding';
 import AppNavigator from './src/navigation/AppNavigator';
 
-// Ignorar advertencias específicas
+// Ignorar algunos mensajes de advertencia específicos
 LogBox.ignoreLogs([
+  'Setting a timer',
   'AsyncStorage has been extracted from react-native',
-  'Sending `onAnimatedValueUpdate` with no listeners registered',
+  'Non-serializable values were found in the navigation state',
 ]);
 
-// Definir el tema personalizado
+// Definir un tema personalizado para la aplicación
 const theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
     primary: '#3E64FF',
-    accent: '#FF3A59',
+    accent: '#5D7DFF',
     background: '#f5f5f5',
     surface: '#ffffff',
-    text: '#2E2E2E',
-    error: '#ff3b30',
+    text: '#333333',
+    error: '#FF6B6B',
   },
 };
 
 export default function App() {
   return (
     <SafeAreaProvider>
+      <StatusBar style="auto" />
       <PaperProvider theme={theme}>
-        <StatusBar style="auto" />
         <AuthProvider>
-          <AppNavigator />
+          <OnboardingProvider>
+            <AppNavigator />
+          </OnboardingProvider>
         </AuthProvider>
       </PaperProvider>
     </SafeAreaProvider>
