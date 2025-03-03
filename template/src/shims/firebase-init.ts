@@ -2,13 +2,13 @@
 import firebase from 'firebase/compat/app';
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyAT1mBDevSlggcqLDNnEAxCmj1KnSuMTtU',
-  authDomain: 'rnfirebase-auth-template.firebaseapp.com',
-  projectId: 'rnfirebase-auth-template',
-  storageBucket: 'rnfirebase-auth-template.appspot.com',
-  messagingSenderId: '725336377227',
-  appId: '1:725336377227:web:d7c6e3fb3d23f9d506118e',
-  measurementId: 'G-9BECK74F26',
+  apiKey: "AIzaSyBW0LYX4WZ-TUj0h5clHNbYL6U-qXQaAHg",
+  authDomain: "fit360-120bb.firebaseapp.com",
+  projectId: "fit360-120bb",
+  storageBucket: "fit360-120bb.firebasestorage.app",
+  messagingSenderId: "575088424012",
+  appId: "1:575088424012:web:acc7fd7c152c03ac3ab0e9",
+  measurementId: "G-4R1R5N2SLK"
 };
 
 const initializeApp = (): void => {

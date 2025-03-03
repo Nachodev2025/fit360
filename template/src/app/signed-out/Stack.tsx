@@ -6,12 +6,19 @@ import ForgotPassword from './ForgotPassword';
 import PhoneSignIn from './PhoneSignIn';
 import SignIn from './SignIn';
 import {NotFound} from '../components/NotFound';
+import ExpoAuthTest from './ExpoAuthTest';
+
 const Stack = createStackNavigator();
 
 function SignedOutStack() {
   const appSettings = useAppSettings();
   return (
-    <Stack.Navigator initialRouteName="home">
+    <Stack.Navigator initialRouteName="ExpoAuthTest">
+      <Stack.Screen
+        name="ExpoAuthTest"
+        component={ExpoAuthTest}
+        options={{title: 'Fit360 Auth Test'}}
+      />
       <Stack.Screen
         name="SignIn"
         component={SignIn}

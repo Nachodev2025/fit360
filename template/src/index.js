@@ -6,6 +6,8 @@ import {AppRegistry} from 'react-native';
 import App from './app/App';
 import {name as appName} from './app.json';
 import './utils/icons';
+// Import Firebase configuration
+import './app/util/firebase';
 
 AppRegistry.registerComponent(appName, () => App);
 AppRegistry.runApplication(appName, {
