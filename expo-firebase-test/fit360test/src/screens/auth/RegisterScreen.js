@@ -4,6 +4,7 @@ import { TextInput, Button, Text, Surface, ActivityIndicator, Snackbar } from 'r
 import { useAuth } from '../../hooks/useAuth';
 import { useOnboarding } from '../../hooks/useOnboarding';
 import { LinearGradient } from 'expo-linear-gradient';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const RegisterScreen = ({ navigation, route }) => {
   const [email, setEmail] = useState('');
@@ -32,9 +33,30 @@ const RegisterScreen = ({ navigation, route }) => {
   };
 
   const handleRegister = async () => {
-    // Validaciones
-    if (!email || !password || !confirmPassword) {
-      setErrorMessage('Por favor, completa todos los campos');
+    console.log('Iniciando registro...');
+    
+    // Para pruebas: Ir directamente a la pantalla de pago si viene del onboarding
+    if (fromOnboarding) {
+      console.log('TEST MODE: Navegando directamente a Paywall sin autenticación');
+      navigation.navigate('Paywall');
+      return;
+    }
+    
+    // Validaciones para el registro
+    if (!email) {
+      setErrorMessage('Por favor ingresa tu email');
+      setSnackbarVisible(true);
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setErrorMessage('Por favor ingresa un email válido');
+      setSnackbarVisible(true);
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      setErrorMessage('La contraseña debe tener al menos 8 caracteres, una letra y un número');
       setSnackbarVisible(true);
       return;
     }
@@ -45,32 +67,74 @@ const RegisterScreen = ({ navigation, route }) => {
       return;
     }
 
-    if (!validatePassword(password)) {
-      setErrorMessage('La contraseña debe tener al menos 8 caracteres, incluyendo letras y números');
-      setSnackbarVisible(true);
-      return;
-    }
-
+    setLoading(true);
     try {
-      await signUp(email, password);
-      // Si viene del onboarding, navegar a la pantalla de paywall
+      console.log('Intentando crear cuenta con email:', email);
+      const user = await signUp(email, password);
+      console.log('Usuario creado exitosamente:', user?.uid || 'No UID disponible');
+      
+      // Determinar la ruta de navegación después del registro exitoso
       if (fromOnboarding) {
-        navigation.navigate('Paywall');
+        console.log('Navegando desde onboarding a paywall...');
+        // Si viene del onboarding, navegar a la pantalla de paywall
+        
+        // También marcamos el onboarding como completado cuando el usuario
+        // se registra exitosamente desde el flujo de onboarding
+        try {
+          await AsyncStorage.setItem('hasCompletedOnboarding', 'true');
+          console.log('Estado de onboarding actualizado a completado');
+        } catch (asyncError) {
+          console.error('Error al guardar estado de onboarding:', asyncError);
+        }
+        
+        // Usar un pequeño retraso para asegurar que la navegación ocurre después
+        // de que Firebase haya actualizado el estado del usuario
+        setTimeout(() => {
+          console.log('Ejecutando navegación a Paywall con retraso');
+          navigation.navigate('Paywall');
+        }, 500);
+      } else {
+        console.log('No viene de onboarding, dejando que AuthNavigator maneje la navegación');
       }
-      // De lo contrario, el AuthNavigator manejará la navegación
+      
     } catch (error) {
+      console.error('Error durante el registro:', error);
       let message = 'Error al crear la cuenta';
       
-      if (error.message.includes('auth/email-already-in-use')) {
-        message = 'Este email ya está en uso';
-      } else if (error.message.includes('auth/invalid-email')) {
-        message = 'Email inválido';
-      } else if (error.message.includes('auth/weak-password')) {
-        message = 'La contraseña es demasiado débil';
+      if (error.code) {
+        console.log('Código de error Firebase:', error.code);
+        switch (error.code) {
+          case 'auth/email-already-in-use':
+            message = 'Este email ya está en uso';
+            break;
+          case 'auth/invalid-email':
+            message = 'Email inválido';
+            break;
+          case 'auth/weak-password':
+            message = 'La contraseña es demasiado débil';
+            break;
+          case 'auth/network-request-failed':
+            message = 'Error de conexión. Verifica tu internet';
+            break;
+          default:
+            message = `Error: ${error.message}`;
+        }
+      } else if (error.message) {
+        if (error.message.includes('auth/email-already-in-use')) {
+          message = 'Este email ya está en uso';
+        } else if (error.message.includes('auth/invalid-email')) {
+          message = 'Email inválido';
+        } else if (error.message.includes('auth/weak-password')) {
+          message = 'La contraseña es demasiado débil';
+        } else if (error.message.includes('network')) {
+          message = 'Error de conexión. Verifica tu internet';
+        }
       }
       
       setErrorMessage(message);
       setSnackbarVisible(true);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -135,11 +199,15 @@ const RegisterScreen = ({ navigation, route }) => {
             
             <Button
               mode="contained"
-              onPress={handleRegister}
+              onPress={() => {
+                console.log("Botón presionado - Crear cuenta y ver mi plan");
+                handleRegister();
+              }}
               style={styles.onboardingButton}
               disabled={loading}
+              labelStyle={styles.buttonLabel}
             >
-              {loading ? <ActivityIndicator color="white" /> : "Crear cuenta y ver mi plan"}
+              {loading ? <ActivityIndicator color="white" size="small" /> : "Crear cuenta y ver mi plan"}
             </Button>
             
             <View style={styles.loginContainer}>
@@ -354,7 +422,10 @@ const styles = StyleSheet.create({
     padding: 5,
     marginVertical: 20,
     backgroundColor: '#3E64FF',
-  }
+  },
+  buttonLabel: {
+    fontSize: 16,
+  },
 });
 
 export default RegisterScreen; 

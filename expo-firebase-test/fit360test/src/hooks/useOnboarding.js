@@ -88,6 +88,13 @@ export const OnboardingProvider = ({ children }) => {
     }
   };
   
+  // Reiniciar solo las respuestas
+  const resetResponses = () => {
+    setResponses({});
+    AsyncStorage.removeItem('onboardingResponses')
+      .catch(error => console.error('Error removing responses:', error));
+  };
+  
   // Reiniciar el onboarding
   const resetOnboarding = async () => {
     try {
@@ -138,6 +145,7 @@ export const OnboardingProvider = ({ children }) => {
     prevStep,
     completeOnboarding,
     resetOnboarding,
+    resetResponses,
     calculateResults
   };
   

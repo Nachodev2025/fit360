@@ -14,6 +14,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useOnboarding } from '../../hooks/useOnboarding';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
 
@@ -56,7 +57,9 @@ const ResultsPreviewScreen = ({ navigation }) => {
   const handleContinue = () => {
     // Avanzar al siguiente paso
     nextStep();
-    // Navegar a la pantalla de registro
+    
+    // NO vamos a marcar el onboarding como completado aquí
+    // Simplemente navegamos a la siguiente pantalla dentro del mismo flujo
     navigation.navigate('Register', { fromOnboarding: true });
   };
   

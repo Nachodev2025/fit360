@@ -17,17 +17,43 @@ const AppNavigator = () => {
   useEffect(() => {
     const checkOnboardingStatus = async () => {
       try {
+        // PARA TESTING: Siempre reiniciar el estado de onboarding
+        await AsyncStorage.setItem('hasCompletedOnboarding', 'false');
+        
         const value = await AsyncStorage.getItem('hasCompletedOnboarding');
         setHasCompletedOnboarding(value === 'true');
-        setCheckingOnboardingStatus(false);
       } catch (error) {
         console.error('Error checking onboarding status:', error);
+      } finally {
         setCheckingOnboardingStatus(false);
       }
     };
 
     checkOnboardingStatus();
   }, []);
+
+  // Listener para cambios en el estado de onboarding
+  useEffect(() => {
+    const onboardingListener = async () => {
+      try {
+        // Suscribirse a cambios en AsyncStorage no es directamente posible,
+        // por lo que podríamos usar un intervalo o un enfoque alternativo
+        // Este es un ejemplo simplificado por ahora
+        const checkInterval = setInterval(async () => {
+          const value = await AsyncStorage.getItem('hasCompletedOnboarding');
+          if ((value === 'true') !== hasCompletedOnboarding) {
+            setHasCompletedOnboarding(value === 'true');
+          }
+        }, 1000); // Comprobar cada segundo
+        
+        return () => clearInterval(checkInterval);
+      } catch (error) {
+        console.error('Error in onboarding listener:', error);
+      }
+    };
+    
+    onboardingListener();
+  }, [hasCompletedOnboarding]);
 
   if (loading || checkingOnboardingStatus) {
     return (

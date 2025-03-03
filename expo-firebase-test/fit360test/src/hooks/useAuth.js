@@ -5,9 +5,10 @@ import {
   createUserWithEmailAndPassword, 
   sendPasswordResetEmail,
   signOut as firebaseSignOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  connectAuthEmulator
 } from 'firebase/auth';
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -20,9 +21,23 @@ const firebaseConfig = {
   measurementId: "G-4R1R5N2SLK"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase - solo inicializar si no existe ya una instancia
+let app;
+if (getApps().length === 0) {
+  console.log('Inicializando Firebase por primera vez');
+  app = initializeApp(firebaseConfig);
+} else {
+  console.log('Firebase ya estaba inicializado');
+  app = getApp();
+}
+
 const auth = getAuth(app);
+
+// En desarrollo, puedes utilizar el emulador de Firebase (descomenta estas líneas si lo necesitas)
+// if (__DEV__) {
+//   connectAuthEmulator(auth, 'http://localhost:9099');
+//   console.log('Usando emulador de Firebase Auth');
+// }
 
 // Create context
 const AuthContext = createContext();
@@ -49,14 +64,20 @@ export const AuthProvider = ({ children }) => {
   // Sign up with email and password
   const signUp = async (email, password) => {
     try {
+      console.log('useAuth: Iniciando proceso de signUp');
       setLoading(true);
       setError(null);
+      
+      console.log('useAuth: Intentando crear usuario con Firebase');
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      console.log('useAuth: Usuario creado exitosamente');
       return userCredential.user;
     } catch (error) {
+      console.error('useAuth: Error en signUp:', error.code, error.message);
       setError(error.message);
       throw error;
     } finally {
+      console.log('useAuth: Finalizando proceso de signUp');
       setLoading(false);
     }
   };

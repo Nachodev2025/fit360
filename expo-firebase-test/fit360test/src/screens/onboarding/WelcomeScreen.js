@@ -1,13 +1,19 @@
 import React from 'react';
-import { StyleSheet, View, Text, Image, TouchableOpacity, SafeAreaView, Dimensions } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Dimensions } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useOnboarding } from '../../hooks/useOnboarding';
 
 const { width, height } = Dimensions.get('window');
 
 const WelcomeScreen = ({ navigation }) => {
+  const { resetResponses } = useOnboarding();
+
   const startOnboarding = () => {
+    // Reiniciamos las respuestas al comenzar
+    resetResponses();
     navigation.navigate('Questionnaire');
   };
 
@@ -15,7 +21,7 @@ const WelcomeScreen = ({ navigation }) => {
     // Marca el onboarding como completado y navega a la autenticación
     AsyncStorage.setItem('hasCompletedOnboarding', 'true')
       .then(() => {
-        // La navegación se manejará automáticamente en AppNavigator
+        // El AppNavigator maneja la navegación automáticamente
       })
       .catch(error => console.error('Error storing onboarding status:', error));
   };
@@ -29,11 +35,10 @@ const WelcomeScreen = ({ navigation }) => {
         style={styles.gradient}
       >
         <View style={styles.contentContainer}>
-          <Image 
-            source={require('../../../assets/logo.png')} 
-            style={styles.logo}
-            resizeMode="contain"
-          />
+          <View style={styles.logoContainer}>
+            <MaterialCommunityIcons name="dumbbell" size={80} color="white" />
+            <Text style={styles.logoText}>FIT360</Text>
+          </View>
           
           <Text style={styles.title}>Transforma tu vida en 360°</Text>
           <Text style={styles.subtitle}>
@@ -79,10 +84,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 20,
   },
-  logo: {
-    width: width * 0.4,
-    height: width * 0.4,
+  logoContainer: {
+    alignItems: 'center',
     marginBottom: 30,
+  },
+  logoText: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: 'white',
+    marginTop: 10,
   },
   title: {
     fontSize: 32,
